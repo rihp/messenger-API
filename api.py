@@ -42,7 +42,9 @@ def create_chat():
     # Else, return an error message, and do nothing.
     if not mongohandler.get_chat_id(title):
         # ♠Optimization: Turn this format to something more
-        participants = [ {username : {'_id':mongohandler.get_user_id(username)}} for username in users]
+        #participants = [ {username : {'_id':mongohandler.get_user_id(username)}} for username in users]
+        participants = [ mongohandler.get_user_id(username) for username in users]
+
         chat_id = db.chat.insert_one(
                                 {  'title':f'{title}',
                                    'creation_date': datetime.today(),
@@ -59,17 +61,17 @@ def add_user(chat_title):
     username = request.args.get("username")
     user_id = mongohandler.get_user_id(username)
     chat_id = mongohandler.get_chat_id(chat_title)
-    db.chat.update(
-        {'_id':chat_id},
-        {
-            #'$push': {
-            '$addToSet': {
-                'participants': {
-                    username : {'_id':user_id}
-                    }
+    if chat_id != None:
+        # ♠ Optimization: Try to check if the user is already a member of the group.
+        db.chat.update(
+            {'_id':chat_id},
+            {'$addToSet': {
+                    'participants': user_id
+                        }
             }
-        }
-    )
+        )
+    else:
+        raise Exception('The chat_id was not be found in the current database.')
     # mongohandler.add_user_to_chat(user_id, chat_id)
     return f'{username} has been added to {chat_title}. <br> chat_id:{chat_id} <br>user_id:{user_id}'
 
@@ -78,14 +80,17 @@ def add_message(chat_title):
     username = request.args.get("username")
     text = request.args.get("text")
     chat_id = mongohandler.get_chat_id(chat_title)
-    # check if the user is in that chat
-    message_id = db.messages.insert_one({ 'chat_title':chat_title,
+    if chat_id != None:
+        if mongohandler.check_user_in_chat(username, chat_title):
+            message_id = db.messages.insert_one({ 'chat_title':chat_title,
                                           'username':username,
                                           'time_sent':datetime.today(),
-                                          'text':text}).inserted_id
-    
-    #record message_id at user document
-    #record message_id at chat document
-    return f"Message sent to <b>{chat_title}</b>!  <br><p><i>{text}</i><br>chat_id: {chat_id}<br> message_id: {message_id}</p>"
+                                          'text':text}
+                                          ).inserted_id
+        #record message_id at user document
+        #record message_id at chat document
+            return f"Message sent to <b>{chat_title}</b>!  <br><p><i>{text}</i><br>chat_id: {chat_id}<br> message_id: {message_id}</p>"
+        else: return f"{username} is not a participant in the public chat {chat_title}."
+    else: return f"The public chat '{chat_title}' does not exist. <br> You could create it using the `/chat/create?title={chat_title}` API end-point."
 
 app.run(host="0.0.0.0", port=5007, debug=True)

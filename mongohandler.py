@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import ast
 
 DBURL = 'mongodb://localhost:27017'
 client = MongoClient(DBURL)
@@ -20,6 +21,15 @@ def get_user_id(username):
     else:
         return user_doc['_id']
 
+def check_user_in_chat(username, chat_title):
+    user_id = get_user_id(username)
+    print(user_id)
+    chat_id = get_chat_id(chat_title)
+    chat_doc = db.chat.find_one({'_id':chat_id})
+    if user_id in chat_doc: return True
+    else: return False    
+
 def add_user_to_chat(user_id, chat_id):
     # Update chat_id, in the participants field, add the specified user_id 
     pass
+
