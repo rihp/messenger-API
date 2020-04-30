@@ -80,8 +80,11 @@ def add_message(chat_title):
     username = request.args.get("username")
     text = request.args.get("text")
     chat_id = mongohandler.get_chat_id(chat_title)
+    user_in_chat = mongohandler.check_user_in_chat(username, chat_title)
+    print(f"Is {username} in the chat {chat_title}? {user_in_chat}")
     if chat_id != None:
-        if mongohandler.check_user_in_chat(username, chat_title):
+        if user_in_chat:
+            
             message_id = db.messages.insert_one({ 'chat_title':chat_title,
                                           'username':username,
                                           'time_sent':datetime.today(),
