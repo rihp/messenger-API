@@ -12,3 +12,14 @@ def get_chat_id(chat_title):
         return None
     else:
         return chat_doc['_id']
+
+def get_user_id(username):
+    user_doc = db.user.find_one({'username':username})
+    if user_doc == None:
+        return None
+    else:
+        return user_doc['_id']
+
+def add_user_to_chat(user_id, chat_id):
+    # Update chat_id, in the participants field, add the specified user_id 
+    pass
