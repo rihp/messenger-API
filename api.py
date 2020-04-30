@@ -40,9 +40,9 @@ def create_chat():
     # Check if that chat_title is available. 
     # If it's NOT created yet, crate it in the MongoDB Collection. 
     # Else, return an error message, and do nothing.
-    if not mongohandler.get_chat_id(title):         
+    if not mongohandler.get_chat_id(title):
         # ♠Optimization: Turn this format to something more
-        participants = [ {user : {'_id':mongohandler.get_user_id(user)}} for user in users]
+        participants = [ {username : {'_id':mongohandler.get_user_id(username)}} for username in users]
         chat_id = db.chat.insert_one(
                                 {  'title':f'{title}',
                                    'creation_date': datetime.today(),
@@ -50,7 +50,6 @@ def create_chat():
                                    #'participants': users,  
                                    'messages': f"Welcome! This group was created with the following users: {', '.join(users)}",                                   
                                 }).inserted_id
-    
         return f"A new chat room has been created! <br> <b>Title</b>:{title} <br> <b>Users</b>:{users} <br> <b>Chat_id</b>: {chat_id} "
     else:
         return f"Error: A public chatroom already exists with the name <b>{title}</b>.<br> Please try using a different chat_title."
@@ -60,9 +59,19 @@ def add_user(chat_title):
     username = request.args.get("username")
     user_id = mongohandler.get_user_id(username)
     chat_id = mongohandler.get_chat_id(chat_title)
-    #if
+    db.chat.update(
+        {'_id':chat_id},
+        {
+            #'$push': {
+            '$addToSet': {
+                'participants': {
+                    username : {'_id':user_id}
+                    }
+            }
+        }
+    )
     # mongohandler.add_user_to_chat(user_id, chat_id)
-    pass
+    return f'{username} has been added to {chat_title}. <br> chat_id:{chat_id} <br>user_id:{user_id}'
 
 @app.route("/chat/<chat_title>/addmessage")
 def add_message(chat_title):
