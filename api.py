@@ -36,20 +36,18 @@ def create_user(username):
 @app.route("/chat/create")
 def create_chat():
     title = request.args.get("title")
-    users = request.args.get("users")
+    users = ast.literal_eval(request.args.get("users"))
     # Check if that chat_title is available. 
     # If it's NOT created yet, crate it in the MongoDB Collection. 
     # Else, return an error message, and do nothing.
-    if not mongohandler.get_chat_id(title): 
-        #rihp = {'rihp' : 'hey'}
-        users = ast.literal_eval(users)
-        #participants = {users[1] : 'whatsupp'}
+    if not mongohandler.get_chat_id(title):         
+        # ♠Optimization: Turn this format to something more
         participants = [ {user : {'_id':mongohandler.get_user_id(user)}} for user in users]
         chat_id = db.chat.insert_one(
                                 {  'title':f'{title}',
                                    'creation_date': datetime.today(),
-                                   'participants': participants, 
-                                   #'participants': users, 
+                                   'participants': participants,  
+                                   #'participants': users,  
                                    'messages': f"Welcome! This group was created with the following users: {', '.join(users)}",                                   
                                 }).inserted_id
     
