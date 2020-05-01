@@ -40,3 +40,9 @@ def add_user_to_chat(user_id, chat_id):
     # Update chat_id, in the participants field, add the specified user_id 
     pass
 
+
+#### DOCUMENT PIPELINE ####
+
+def get_doc_from_array(query, chat_title):
+    for doc in query:
+        if doc['_id'] == get_chat_id(chat_title): return doc
