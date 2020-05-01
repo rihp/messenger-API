@@ -19,6 +19,7 @@ def landing_page():
 def create_user(username):
     # Optimization ♠: 
     # Confirm if that username is taken, before creating it.
+    username = username.lower()
     if not mongohandler.get_user_id(username): 
         user_id = db.user.insert_one(
                                 {  'username':f'{username}',
