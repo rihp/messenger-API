@@ -14,7 +14,7 @@ def get_chat_id(chat_title):
     chat_title = no_spaces(chat_title).lower() 
 
     chat_doc = db.chat.find_one({'title':chat_title})
-    print(chat_doc)
+   # print(chat_doc)
     if chat_doc == None:
         #raise Exception("Error!! That `chat_title` does not exist")
         return None
@@ -38,7 +38,7 @@ def check_user_in_chat(username, chat_title):
                         }
                     )
 
-    print(chat_id, user_id, status)
+#    print(chat_id, user_id, status)
     if status: 
         return True
     else: 
