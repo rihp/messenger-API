@@ -91,9 +91,9 @@ def add_message(chat_title):
         if user_id != None:
             if user_in_chat:
                 message_id = db.messages.insert_one({'chat_id':chat_id,
-                                        'chat_title':chat_title,
+                                        #'chat_title':chat_title,
                                         'user_id':user_id,
-                                        'username':username,
+                                        #'username':username,
                                         'time_sent':datetime.today(),
                                         'text':text}
                                         ).inserted_id
