@@ -63,7 +63,7 @@ def create_chat():
 @app.route(("/chat/<chat_title>/adduser"))
 def add_user(chat_title):
     username = request.args.get("username")
-    user_id = mongohandler.get_user_id(username)
+    user_id = mongohandler.get_user_id(username.lower())
     chat_id = mongohandler.get_chat_id(chat_title)
     if chat_id != None:
         if user_id == None: return f'Sorry. The chat was not created because the <b>user_id</b> does not exist for the username <b> {username}</b>.'

@@ -7,7 +7,7 @@ print(f"Connected to MongoClient at: {DBURL}")
 db = client.messenger
 
 def get_chat_id(chat_title):
-    chat_doc = db.chat.find_one({'title':chat_title})
+    chat_doc = db.chat.find_one({'title':chat_title.lower()})
     if chat_doc == None:
         #raise Exception("Error!! That `chat_title` does not exist")
         return None
@@ -15,15 +15,15 @@ def get_chat_id(chat_title):
         return chat_doc['_id']
 
 def get_user_id(username):
-    user_doc = db.user.find_one({'username':username})
+    user_doc = db.user.find_one({'username':username.lower()})
     if user_doc == None:
         return None
     else:
         return user_doc['_id']
 
 def check_user_in_chat(username, chat_title):
-    user_id = get_user_id(username)
-    chat_id = get_chat_id(chat_title)
+    user_id = get_user_id(username.lower())
+    chat_id = get_chat_id(chat_title.lower())
     status = db.chat.find_one(
                         {'_id':chat_id, 
                          'participants': user_id
@@ -45,4 +45,4 @@ def add_user_to_chat(user_id, chat_id):
 
 def get_doc_from_array(query, chat_title):
     for doc in query:
-        if doc['_id'] == get_chat_id(chat_title): return doc
+        if doc['_id'] == get_chat_id(chat_title.lower()): return doc
