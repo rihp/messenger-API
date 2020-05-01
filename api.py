@@ -25,8 +25,8 @@ def create_user(username):
         user_id = db.user.insert_one(
                                 {  'username':f'{username}',
                                    'join_date': datetime.today(),
-                                   'chats_joined': {},                                 
-                                   'messages_sent':{},                                   
+                                   'chats_joined': ['sorry, this field should be added when creating each new chat'],                                 
+                                   'messages_sent':['sorry, this field should be added when user adds a message to a chat'],                                   
                                 }).inserted_id
         return f"""
         <b>User has been created </b>       <br>
@@ -37,7 +37,7 @@ def create_user(username):
 
 @app.route("/chat/create")
 def create_chat():
-    title = request.args.get("title")
+    title =  mongohandler.no_spaces(request.args.get("title")).lower()
     users = ast.literal_eval(request.args.get("users"))
     # Check if that chat_title is available. 
     # If it's NOT created yet, crate it in the MongoDB Collection. 
@@ -45,18 +45,15 @@ def create_chat():
     for user in users: # Check if all the users exist
         user_id = mongohandler.get_user_id(user)
         if user_id == None: return f'Sorry. The chat was not created because the <b>user_id</b> does not exist for the username <b> {user}</b>.'
-    if not mongohandler.get_chat_id(title):
-        # ♠Optimization: Use this format to organize the 'messages' attribute of the chat documents and the user documents
-        participants = [ mongohandler.get_user_id(username) for username in users]
-
+    if mongohandler.get_chat_id(title) == None:      
         chat_id = db.chat.insert_one(
-                                {  'title':f'{title}',
-                                   'creation_date': datetime.today(),
-                                   'participants': participants,  
-                                   #'messages': f"Welcome! This group was created with the following users: {', '.join(users)}",                                   
-                                   'messages': [],                                   
-                                }).inserted_id
-
+            {  'title':f'{title}',
+                'creation_date': datetime.today(),
+                # ♠Optimization: Use this format to organize the 'messages' attribute of the chat documents and the user documents
+                'participants': [ mongohandler.get_user_id(username) for username in users],  
+                #'messages': f"Welcome! This group was created with the following users: {', '.join(users)}",                                   
+                'messages': [],                                   
+            }).inserted_id
         return f"A new chat room has been created! <br> <b>Title</b>:{title} <br> <b>Users</b>:{users} <br> <b>Chat_id</b>: {chat_id} "
     else:
         return f"Error: A public chatroom already exists with the name <b>{title}</b>.<br> Please try using a different chat_title."

@@ -10,8 +10,11 @@ def no_spaces(string):
     return string.replace(' ', '_')
 
 def get_chat_id(chat_title):
-    chat_title = no_spaces(chat_title) # ♠ Optimization: Turn this repeated line into a decorator
-    chat_doc = db.chat.find_one({'title':chat_title.lower()})
+    # ♠ Optimization: Turn this repeated line into a decorator
+    chat_title = no_spaces(chat_title).lower() 
+
+    chat_doc = db.chat.find_one({'title':chat_title})
+    print(chat_doc)
     if chat_doc == None:
         #raise Exception("Error!! That `chat_title` does not exist")
         return None
