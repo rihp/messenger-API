@@ -6,7 +6,11 @@ client = MongoClient(DBURL)
 print(f"Connected to MongoClient at: {DBURL}")
 db = client.messenger
 
+def no_spaces(string):
+    return string.replace(' ', '_')
+
 def get_chat_id(chat_title):
+    chat_title = no_spaces(chat_title) # ♠ Optimization: Turn this repeated line into a decorator
     chat_doc = db.chat.find_one({'title':chat_title.lower()})
     if chat_doc == None:
         #raise Exception("Error!! That `chat_title` does not exist")
@@ -15,6 +19,7 @@ def get_chat_id(chat_title):
         return chat_doc['_id']
 
 def get_user_id(username):
+    username = no_spaces(username)
     user_doc = db.user.find_one({'username':username.lower()})
     if user_doc == None:
         return None
@@ -35,6 +40,7 @@ def check_user_in_chat(username, chat_title):
         return True
     else: 
         return False     
+        
 
 def add_user_to_chat(user_id, chat_id):
     # Update chat_id, in the participants field, add the specified user_id 
