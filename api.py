@@ -90,19 +90,26 @@ def add_message(chat_title):
     if chat_id != None:
         if user_id != None:
             if user_in_chat:
-                message_id = db.messages.insert_one({'chat_id':chat_id,
-                                        #'chat_title':chat_title,
-                                        'user_id':user_id,
-                                        #'username':username,
-                                        'time_sent':datetime.today(),
-                                        'text':text}
-                                        ).inserted_id
+                message_id = db.messages.insert_one(
+                    {
+                        'chat_id':chat_id,
+                        'user_id':user_id,
+                        'time_sent':datetime.today(),
+                        'text':text}
+                    ).inserted_id
                 #record message_id at user document                                        
+                db.user.update(
+                    {'_id':user_id},
+                    {'$addToSet': {
+                        'messages_sent': message_id
+                        }
+                    }
+                )
                 db.chat.update(
                     {'_id':chat_id},
                     {'$addToSet': {
                         'messages': message_id
-                                }
+                        }
                     }
                 )        
                 #record message_id at chat document

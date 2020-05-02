@@ -35,10 +35,7 @@ def check_user_in_chat(username, chat_title):
     status = db.chat.find_one(
                         {'_id':chat_id, 
                          'participants': user_id
-                        }
-                    )
-
-#    print(chat_id, user_id, status)
+                        })
     if status: 
         return True
     else: 
