@@ -26,7 +26,7 @@ def create_user(username):
                                 {  'username':f'{username}',
                                    'join_date': datetime.today(),
                                    'chats_joined': ['sorry, this field should be added when creating each new chat'],                                 
-                                   'messages_sent':['sorry, this field should be added when user adds a message to a chat'],                                   
+                                   'messages_sent':[],                                   
                                 }).inserted_id
         return f"""
         <b>User has been created </b>       <br>
