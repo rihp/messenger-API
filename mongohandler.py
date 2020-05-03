@@ -1,10 +1,11 @@
-from pymongo import MongoClient
 import ast
+from pymongo import MongoClient
+from src.config import *
 
-DBURL = 'mongodb://localhost:27017'
-client = MongoClient(DBURL)
-print(f"Connected to MongoClient at: {DBURL}")
-db = client.messenger
+#DBURL = 'mongodb://localhost:27017'
+#client = MongoClient(DBURL)
+#print(f"Connected to MongoClient at: {DBURL}")
+#db = client.messenger
 
 def no_spaces(string):
     return string.replace(' ', '_')

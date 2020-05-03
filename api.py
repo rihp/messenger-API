@@ -1,13 +1,15 @@
 from flask import Flask, request
 from pymongo import MongoClient
 from datetime import datetime
+from src.config import *
+#from src.config import flask_api, db
 import mongohandler
 import ast
 
-DBURL = 'mongodb://localhost:27017'
-client = MongoClient(DBURL)
-print(f"Connected to MongoClient at: {DBURL}")
-db = client.messenger
+#DBURL = 'mongodb://localhost:27017'
+#client = MongoClient(DBURL)
+#print(f"Connected to MongoClient at: {DBURL}")
+#db = client.messenger
 
 app = Flask(__name__)
 
