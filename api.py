@@ -3,8 +3,12 @@ from pymongo import MongoClient
 from datetime import datetime
 from src.config import *
 #from src.config import flask_api, db
-import mongohandler
+from mongohandler import *
 import ast
+
+import pandas as pd
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
 
 #DBURL = 'mongodb://localhost:27017'
 #client = MongoClient(DBURL)
@@ -21,9 +25,9 @@ def landing_page():
 def create_user(username):
     # Optimization ♠: 
     # Confirm if that username is taken, before trying to create it.
-    username = mongohandler.no_spaces(username).lower()
+    username = no_spaces(username).lower()
     
-    if not mongohandler.get_user_id(username): 
+    if not get_user_id(username): 
         user_id = db.user.insert_one(
                                 {  'username':f'{username}',
                                    'join_date': datetime.today(),
@@ -39,20 +43,20 @@ def create_user(username):
 
 @app.route("/chat/create")
 def create_chat():
-    title =  mongohandler.no_spaces(request.args.get("title")).lower()
+    title =  no_spaces(request.args.get("title")).lower()
     users = ast.literal_eval(request.args.get("users"))
     # Check if that chat_title is available. 
     # If it's NOT created yet, crate it in the MongoDB Collection. 
     # Else, return an error message, and do nothing.
     for user in users: # Check if all the users exist
-        user_id = mongohandler.get_user_id(user)
+        user_id = get_user_id(user)
         if user_id == None: return f'Sorry. The chat was not created because the <b>user_id</b> does not exist for the username <b> {user}</b>.'
-    if mongohandler.get_chat_id(title) == None:      
+    if get_chat_id(title) == None:      
         chat_id = db.chat.insert_one(
             {  'title':f'{title}',
                 'creation_date': datetime.today(),
                 # ♠Optimization: Use this format to organize the 'messages' attribute of the chat documents and the user documents
-                'participants': [ mongohandler.get_user_id(username) for username in users],  
+                'participants': [ get_user_id(username) for username in users],  
                 #'messages': f"Welcome! This group was created with the following users: {', '.join(users)}",                                   
                 'messages': [],                                   
             }).inserted_id
@@ -63,11 +67,11 @@ def create_chat():
 @app.route(("/chat/<chat_title>/adduser"))
 def add_user(chat_title):
     username = request.args.get("username")
-    user_id = mongohandler.get_user_id(username)
-    chat_id = mongohandler.get_chat_id(chat_title)
+    user_id = get_user_id(username)
+    chat_id = get_chat_id(chat_title)
     if chat_id != None:
         if user_id == None: return f'Sorry. The chat was not created because the <b>user_id</b> does not exist for the username <b> {username}</b>.'
-        if mongohandler.check_user_in_chat(username, chat_title): return f'<b>{username}</b> is already a member of the chat named <b>{chat_title}</b>.'
+        if check_user_in_chat(username, chat_title): return f'<b>{username}</b> is already a member of the chat named <b>{chat_title}</b>.'
         # ♠ Optimization: Try to check if the user is already a member of the group.
         db.chat.update(
             {'_id':chat_id},
@@ -78,16 +82,16 @@ def add_user(chat_title):
         )
     else:
         raise Exception('The chat_id was not found in the current database.')
-    # mongohandler.add_user_to_chat(user_id, chat_id)
+    # add_user_to_chat(user_id, chat_id)
     return f'<b>{username}</b> has been added to <b>{chat_title}</b>. <br> chat_id:{chat_id} <br>user_id:{user_id}'
 
 @app.route("/chat/<chat_title>/addmessage")
 def add_message(chat_title):
     username = request.args.get("username")
     text = request.args.get("text")
-    chat_id = mongohandler.get_chat_id(chat_title)
-    user_id = mongohandler.get_user_id(username)
-    user_in_chat = mongohandler.check_user_in_chat(username, chat_title)
+    chat_id = get_chat_id(chat_title)
+    user_id = get_user_id(username)
+    user_in_chat = check_user_in_chat(username, chat_title)
     print(f"Is {username} in the chat {chat_title}? {user_in_chat}")
     if chat_id != None:
         if user_id != None:
@@ -120,12 +124,28 @@ def add_message(chat_title):
         else: return f"The user <b>{username} </b>does not exist. You can register a new user with the `/user/create/{username}` API end-point."
     else: return f"The public chat <b>'{chat_title}'</b> does not exist. <br> You could create it using the `/chat/create?title={chat_title}` API end-point."
 
-@app.route("/user/<username>/recommend")
-def recommend_friends(username):
-    pass
 
 @app.route("/chat/<chat_title>/sentiment")
-def add_message(chat_title):
+def chat_sentiment(chat_title):
+    sia = SentimentIntensityAnalyzer()
+    chat_title = no_spaces(chat_title).lower()
+    CHATSquery = get_CHATSquery()
+
+    chat_messages = list(get_chat_doc(chat_title, CHATSquery))[0]['messages']
+
+    def analyze_chat_sentiment(chat_messages):
+        for i in range(len(chat_messages)):
+            text = chat_messages[i]['text']
+            yield sia.polarity_scores(text)
+    sentiment = pd.DataFrame(list(analyze_chat_sentiment(chat_messages)))
+
+
+    return sentiment.to_json()
+    pass
+
+
+@app.route("/user/<username>/recommend")
+def recommend_friends(username):
     pass
 
 app.run(host="0.0.0.0", port=5007, debug=True)

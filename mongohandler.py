@@ -42,13 +42,40 @@ def check_user_in_chat(username, chat_title):
     else: 
         return False     
         
-
 def add_user_to_chat(user_id, chat_id):
     # Update chat_id, in the participants field, add the specified user_id 
     pass
 
 
 #### DOCUMENT PIPELINE ####
+
+def get_CHATSquery():
+    cur = db.chat.aggregate([{'$lookup': {
+                                'from': 'messages',             # Use the messages collection
+                                'localField': 'messages',   
+                                'foreignField': '_id',     
+                                'as': 'messages'}
+                            }, 
+                            {'$project': {
+                                '_id': 1, 
+                                'title': 1, 
+                                'participants': 1, 
+                                'messages': {
+                                    'text': 1, 
+                                    'username': 1}
+                            }}])
+    CHATSquery = list(cur)
+    return CHATSquery
+
+def get_chat_doc(chat_title, query):
+# This function takes in a pymongo CHATSquery cursor
+# which has already been turned into a list
+# and looks for an specific chat title.
+    for i in range(len(query)):
+        if query[i]['title'] == chat_title:
+            yield query[i]
+
+
 
 def get_doc_from_array(query, chat_title):
     for doc in query:
