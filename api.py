@@ -3,7 +3,8 @@ from pymongo import MongoClient
 from datetime import datetime
 from src.config import *
 #from src.config import flask_api, db
-from mongohandler import *
+from src.mongohandler import *
+from src import recommender
 import ast
 
 import pandas as pd
@@ -141,12 +142,10 @@ def chat_sentiment(chat_title):
 
 
     return sentiment.to_json()
-    pass
-
 
 @app.route("/user/<username>/recommend")
 def recommend_friends(username):
-    pass
+    return recommender.most_similar_users('rick', top=3)
 
 app.run(host="0.0.0.0", port=5007, debug=True)
 
