@@ -140,12 +140,16 @@ def chat_sentiment(chat_title):
             yield sia.polarity_scores(text)
     sentiment = pd.DataFrame(list(analyze_chat_sentiment(chat_messages)))
 
-
     return sentiment.to_json()
+
+
+# MAKE THE COMPUTATION WHEN LOADING THE MODULE TO AVOID UNNECESSARY RE-CALCUTALIONS
+print("Calculating User Similarity Matrix... \n  This might take a while. \n Running from api.py")
+similatiry_matrix = recommender.user_similarity_matrix()
 
 @app.route("/user/<username>/recommend")
 def recommend_friends(username):
-    return recommender.most_similar_users('rick', top=3)
+    return recommender.most_similar_users('rick',similatiry_matrix, top=3)
 
 app.run(host="0.0.0.0", port=5007, debug=True)
 
