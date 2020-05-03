@@ -120,4 +120,13 @@ def add_message(chat_title):
         else: return f"The user <b>{username} </b>does not exist. You can register a new user with the `/user/create/{username}` API end-point."
     else: return f"The public chat <b>'{chat_title}'</b> does not exist. <br> You could create it using the `/chat/create?title={chat_title}` API end-point."
 
+@app.route("/user/<username>/recommend")
+def recommend_friends(username):
+    pass
+
+@app.route("/chat/<chat_title>/sentiment")
+def add_message(chat_title):
+    pass
+
 app.run(host="0.0.0.0", port=5007, debug=True)
+
