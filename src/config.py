@@ -8,6 +8,7 @@ load_dotenv()
 MA = os.getenv("MA")
 MAU = os.getenv("MAU")
 MSERVER= os.getenv("MSERVER")
+PORT= os.getenv("PORT")
 
 flask_api = 'http://localhost:5007'    
 

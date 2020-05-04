@@ -8,8 +8,10 @@ from src import recommender
 import ast
 
 import pandas as pd
+import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
+nltk.download('vader_lexicon')
 
 #DBURL = 'mongodb://localhost:27017'
 #client = MongoClient(DBURL)
@@ -145,18 +147,22 @@ def chat_sentiment(chat_title):
 
 # MAKE THE COMPUTATION WHEN LOADING THE MODULE TO AVOID UNNECESSARY RE-CALCUTALIONS
 
-similatiry_matrix = "Not calculated yet. `/user/update/similaritymatrix`
+similatiry_matrix = "Not calculated yet. `/user/update/similaritymatrix`"
+
+@app.route("/user/<username>/recommend")
+def recommend_friends(username):
+    if type(similarity_matrix) == str: return similarity_matrix
+    print(type(similarity_matrix))
+    return recommender.most_similar_users(username, similatiry_matrix, top=3)
+
 
 @app.route("/user/update/similaritymatrix")
 def similarity_matrix():
     print("Calculating User Similarity Matrix... \n  This might take a while. \n  Running from api.py")
-    global similatiry_matrix = recommender.user_similarity_matrix()
+    global similatiry_matrix
+    similatiry_matrix = recommender.user_similarity_matrix()
     print(' SIM MATRIX CALCULATED')
-    return f'SIM MATRIX CALCULATED'
+    return f'SIM MATRIX CALCULATED <br> Check out the new endpoint`/user/<username>/recommend`'
 
-@app.route("/user/<username>/recommend")
-def recommend_friends(username):
-    return recommender.most_similar_users(username, similatiry_matrix, top=3)
-
-app.run(host="0.0.0.0", port=5007, debug=True)
+app.run(host="0.0.0.0", port=PORT, debug=True)
 
