@@ -2,10 +2,12 @@ from flask import Flask, request
 from pymongo import MongoClient
 from datetime import datetime
 from src.config import *
-#from src.config import flask_api, db
 from src.mongohandler import *
 from src import recommender
+from src.html.pages import *
+
 import ast
+
 
 import pandas as pd
 import nltk
@@ -13,16 +15,16 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 nltk.download('vader_lexicon')
 
-#DBURL = 'mongodb://localhost:27017'
-#client = MongoClient(DBURL)
-#print(f"Connected to MongoClient at: {DBURL}")
-#db = client.messenger
-
 app = Flask(__name__)
 
 @app.route("/")
 def landing_page():
+    return home_html
     return 'Hello, world! Welcome to my Messenger API.'
+
+@app.route("/users")
+def users_list():
+    return HEADER+"Currently under development"
 
 @app.route("/user/create/<username>")
 def create_user(username):
@@ -37,12 +39,34 @@ def create_user(username):
                                    'chats_joined': ['sorry, this field should be added when creating each new chat'],                                 
                                    'messages_sent':[],                                   
                                 }).inserted_id
-        return f"""
+        return HEADER+f"""
         <b>User has been created </b>       <br>
         <b>The new username: </b>{username}  <br>        
         <b>user_id:</b> {user_id}"""
     else: 
         return f"<b>Sorry. That username, '{username}' is already taken.</b> <br>Please choose a different username."
+
+
+# MAKE THE COMPUTATION WHEN LOADING THE MODULE TO AVOID UNNECESSARY RE-CALCUTALIONS
+similatiry_matrix = "Not calculated yet. `/user/update/similaritymatrix`"
+
+@app.route("/user/<username>/recommend")
+def recommend_friends(username):
+    if type(similarity_matrix) == str: return similarity_matrix
+    print(type(similarity_matrix))
+    return recommender.most_similar_users(username, similatiry_matrix, top=3)
+
+@app.route("/user/update/similaritymatrix")
+def similarity_matrix():
+    print("Calculating User Similarity Matrix... \n  This might take a while. \n  Running from api.py")
+    global similatiry_matrix
+    similatiry_matrix = recommender.user_similarity_matrix()
+    print(' SIM MATRIX CALCULATED')
+    return f'SIM MATRIX CALCULATED <br> Check out the new endpoint`/user/<username>/recommend`'
+
+@app.route("/chats")
+def chats_list():
+    return HEADER+"Currently under development"
 
 @app.route("/chat/create")
 def create_chat():
@@ -63,9 +87,10 @@ def create_chat():
                 #'messages': f"Welcome! This group was created with the following users: {', '.join(users)}",                                   
                 'messages': [],                                   
             }).inserted_id
-        return f"A new chat room has been created! <br> <b>Title</b>:{title} <br> <b>Users</b>:{users} <br> <b>Chat_id</b>: {chat_id} "
+        return HEADER+f"A new chat room has been created! <br> <b>Title</b>:{title} <br> <b>Users</b>:{users} <br> <b>Chat_id</b>: {chat_id} "
     else:
-        return f"Error: A public chatroom already exists with the name <b>{title}</b>.<br> Please try using a different chat_title."
+        return HEADER+f"Error: A public chatroom already exists with the name <b>{title}</b>.<br> Please try using a different chat_title."
+
 
 @app.route(("/chat/<chat_title>/adduser"))
 def add_user(chat_title):
@@ -86,7 +111,7 @@ def add_user(chat_title):
     else:
         raise Exception('The chat_id was not found in the current database.')
     # add_user_to_chat(user_id, chat_id)
-    return f'<b>{username}</b> has been added to <b>{chat_title}</b>. <br> chat_id:{chat_id} <br>user_id:{user_id}'
+    return HEADER+f'<b>{username}</b> has been added to <b>{chat_title}</b>. <br> chat_id:{chat_id} <br>user_id:{user_id}'
 
 @app.route("/chat/<chat_title>/addmessage")
 def add_message(chat_title):
@@ -122,11 +147,10 @@ def add_message(chat_title):
                     }
                 )        
                 #record message_id at chat document
-                return f"Message sent to <b>{chat_title}</b>!  <br><p><i>{text}</i><br>chat_id: {chat_id}<br> message_id: {message_id}<br> user_id: {user_id}</p>"
+                return HEADER+f"Message sent to <b>{chat_title}</b>!  <br><p><i>{text}</i><br>chat_id: {chat_id}<br> message_id: {message_id}<br> user_id: {user_id}</p>"
             else: return f"<b>{username}</b> is not a participant in the public chat <b>{chat_title}</b>."
         else: return f"The user <b>{username} </b>does not exist. You can register a new user with the `/user/create/{username}` API end-point."
     else: return f"The public chat <b>'{chat_title}'</b> does not exist. <br> You could create it using the `/chat/create?title={chat_title}` API end-point."
-
 
 @app.route("/chat/<chat_title>/sentiment")
 def chat_sentiment(chat_title):
@@ -144,25 +168,6 @@ def chat_sentiment(chat_title):
 
     return sentiment.to_json()
 
-
-# MAKE THE COMPUTATION WHEN LOADING THE MODULE TO AVOID UNNECESSARY RE-CALCUTALIONS
-
-similatiry_matrix = "Not calculated yet. `/user/update/similaritymatrix`"
-
-@app.route("/user/<username>/recommend")
-def recommend_friends(username):
-    if type(similarity_matrix) == str: return similarity_matrix
-    print(type(similarity_matrix))
-    return recommender.most_similar_users(username, similatiry_matrix, top=3)
-
-
-@app.route("/user/update/similaritymatrix")
-def similarity_matrix():
-    print("Calculating User Similarity Matrix... \n  This might take a while. \n  Running from api.py")
-    global similatiry_matrix
-    similatiry_matrix = recommender.user_similarity_matrix()
-    print(' SIM MATRIX CALCULATED')
-    return f'SIM MATRIX CALCULATED <br> Check out the new endpoint`/user/<username>/recommend`'
 
 app.run(host="0.0.0.0", port=PORT, debug=True)
 
