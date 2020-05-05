@@ -16,15 +16,15 @@ These are public chats and **Data Privacy must be considered when sending messag
 # API Endpoints
 
 
-## `/`
+### `/`
 
   API landing page. It uses some html strings defined at the `pages.py` file
 
-## `/users`
+#### `/users`
 
   A list of all the users registered in the API. There cannot be two users with the same username.
 
-## `/user/create/{username}`
+##### `/user/create/{username}`
 
   Create a new user with the {username}
 
