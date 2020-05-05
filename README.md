@@ -20,31 +20,44 @@ These are public chats and **Data Privacy must be considered when sending messag
 `/`
 
   API landing page.
+
 `/users`
 
   A list of all the users in the API
+
 `/user/create/{username}`
 
   Create a new user with the {username}
+
 `/user/{username}/recommend`
 
   Generate friend suggestions from the messages that {username} has sent to the chats
+
+
 `/chats`
 
   A list of all the {chat_titles}
+
+
 `/chat/create?title={ct}&usernames={arr}`
 
   Where {ct} is the Chat Title, and {arr} is an array of format `['username_one', 'username_two', ... , 'username_nth']` Generate friend suggestions from the messages that {username} has sent to the chats
+
 `/chat/{chat_title}/adduser`
+
 description
 
 `/chat/{chat_title}/addmessage`
+
 description
 
 `/chat/{chat_title}/sentiment`
+
 description
 
+
 `/messages`
+
 cd inA list of all the messages.
 
 `/user/update/similaritymatrix`
