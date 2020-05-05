@@ -13,53 +13,53 @@ We will also use a recommender system to predict which users who write about the
 
 These are public chats and **Data Privacy must be considered when sending messages**.
 
-## Endpoints
+# API Endpoints
 
 
+## `/`
 
-`/`
+  API landing page. It uses some html strings defined at the `pages.py` file
 
-  API landing page.
+## `/users`
 
-`/users`
+  A list of all the users registered in the API. There cannot be two users with the same username.
 
-  A list of all the users in the API
-
-`/user/create/{username}`
+## `/user/create/{username}`
 
   Create a new user with the {username}
 
-`/user/{username}/recommend`
+## `/user/{username}/recommend`
 
   Generate friend suggestions from the messages that {username} has sent to the chats
 
 
-`/chats`
+## `/chats`
 
   A list of all the {chat_titles}
 
 
-`/chat/create?title={ct}&usernames={arr}`
+## `/chat/create?title={ct}&usernames={arr}`
 
   Where {ct} is the Chat Title, and {arr} is an array of format `['username_one', 'username_two', ... , 'username_nth']` Generate friend suggestions from the messages that {username} has sent to the chats
 
-`/chat/{chat_title}/adduser`
+## `/chat/{chat_title}/adduser`
 
-description
+  description
 
-`/chat/{chat_title}/addmessage`
+## `/chat/{chat_title}/addmessage`
 
-description
+  description
 
-`/chat/{chat_title}/sentiment`
+## `/chat/{chat_title}/sentiment`
 
-description
+  description
 
 
-`/messages`
+## `/messages`
 
-cd inA list of all the messages.
+  cd inA list of all the messages.
 
-`/user/update/similaritymatrix`
-description
+## `/user/update/similaritymatrix`
+
+   description
 
